@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
+/* The site is always light: `dark:` only applies under an explicit .dark class. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
+  color-scheme: light;
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -12,15 +16,155 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+body {
+  background-color: var(--cream);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+:root {
+  --cream: #ede8d0;
+  --brand: #D0D5ED;
+  --brand-light: var(--brand);
+  --brand-lighter: var(--brand);
+  --brand-secondary: var(--brand);
+  --on-brand: #1e2240;
+  --amber: oklch(0.77 0.16 75);
+  --amber-fg: oklch(0.22 0 0);
+  --amber-hover: oklch(0.71 0.17 70);
+  --blue: oklch(0.62 0.19 256);
+  --blue-fg: #fff;
+  --blue-hover: oklch(0.56 0.2 256);
+  --green: oklch(0.7 0.17 152);
+  --green-fg: #fff;
+  --green-hover: oklch(0.64 0.18 152);
+  --thumb: #fff;
+  --smooth-50: oklch(0.99 0 0);
+  --smooth-100: oklch(0.972 0 0);
+  --smooth-200: oklch(0.945 0 0);
+  --smooth-300: oklch(0.91 0 0);
+  --smooth-400: oklch(0.865 0 0);
+  --smooth-500: oklch(0.81 0 0);
+  --smooth-600: oklch(0.74 0 0);
+  --smooth-700: oklch(0.66 0 0);
+  --smooth-800: oklch(0.56 0 0);
+  --smooth-900: oklch(0.47 0 0);
+  --smooth-950: oklch(0.36 0 0);
+  --smooth-1000: oklch(0.22 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-fg: #fff;
+  --destructive-hover: color-mix(in oklab, var(--destructive) 85%, black);
+  --destructive-top: #fd4b4e;
+  --destructive-edge: #f61418;
+  --btn-drop: rgb(0 0 0 / 0.4);
+  --btn-sheen: rgb(255 255 255 / 0.2);
+  --primary: var(--brand);
+  --primary-foreground: var(--on-brand);
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --ring: var(--brand);
+}
+
+@theme inline {
+  --color-cream: var(--cream);
+  --color-brand: var(--brand);
+  --color-brand-light: var(--brand-light);
+  --color-brand-lighter: var(--brand-lighter);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-on-brand: var(--on-brand);
+  --color-amber: var(--amber);
+  --color-amber-fg: var(--amber-fg);
+  --color-amber-hover: var(--amber-hover);
+  --color-blue: var(--blue);
+  --color-blue-fg: var(--blue-fg);
+  --color-blue-hover: var(--blue-hover);
+  --color-green: var(--green);
+  --color-green-fg: var(--green-fg);
+  --color-green-hover: var(--green-hover);
+  --color-thumb: var(--thumb);
+  --color-smooth-50: var(--smooth-50);
+  --color-smooth-100: var(--smooth-100);
+  --color-smooth-200: var(--smooth-200);
+  --color-smooth-300: var(--smooth-300);
+  --color-smooth-400: var(--smooth-400);
+  --color-smooth-500: var(--smooth-500);
+  --color-smooth-600: var(--smooth-600);
+  --color-smooth-700: var(--smooth-700);
+  --color-smooth-800: var(--smooth-800);
+  --color-smooth-900: var(--smooth-900);
+  --color-smooth-950: var(--smooth-950);
+  --color-smooth-1000: var(--smooth-1000);
+  --color-destructive: var(--destructive);
+  --color-destructive-fg: var(--destructive-fg);
+  --color-destructive-hover: var(--destructive-hover);
+  --color-destructive-top: var(--destructive-top);
+  --color-destructive-edge: var(--destructive-edge);
+  --color-btn-drop: var(--btn-drop);
+  --color-btn-sheen: var(--btn-sheen);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-ring: var(--ring);
+}
+
+@layer components {
+  .paragraph-lead {
+    @apply mt-7 max-w-xl text-base leading-7 text-foreground/60 md:text-lg md:leading-8;
+  }
+
+  .paragraph-muted {
+    @apply mt-2 text-sm leading-relaxed text-muted-foreground;
+  }
+
+  .caption {
+    @apply text-xs font-medium uppercase tracking-[0.3em] text-foreground/45;
+  }
+
+  .caption-muted {
+    @apply text-[0.65rem] font-medium uppercase tracking-[0.28em] text-foreground/35;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Cookie banner (vanilla-cookieconsent) themed to the site palette.
+   `html #cc-main` outranks the library's own `#cc-main` defaults. */
+html #cc-main {
+  --cc-font-family: inherit;
+  --cc-bg: #fbf9f1;
+  --cc-primary-color: var(--foreground);
+  --cc-secondary-color: color-mix(in oklab, var(--foreground) 65%, transparent);
+  --cc-modal-border-radius: 1.5rem;
+  --cc-btn-border-radius: 9999px;
+  --cc-btn-primary-bg: var(--brand);
+  --cc-btn-primary-color: var(--on-brand);
+  --cc-btn-primary-border-color: var(--brand);
+  --cc-btn-primary-hover-bg: color-mix(in oklab, var(--brand) 85%, black);
+  --cc-btn-primary-hover-color: var(--on-brand);
+  --cc-btn-primary-hover-border-color: color-mix(in oklab, var(--brand) 85%, black);
+  --cc-btn-secondary-bg: var(--cream);
+  --cc-btn-secondary-color: var(--foreground);
+  --cc-btn-secondary-border-color: var(--cream);
+  --cc-btn-secondary-hover-bg: color-mix(in oklab, var(--cream) 85%, black);
+  --cc-btn-secondary-hover-color: var(--foreground);
+  --cc-btn-secondary-hover-border-color: color-mix(in oklab, var(--cream) 85%, black);
+  --cc-toggle-on-bg: var(--brand);
+  --cc-toggle-on-knob-bg: #fff;
+  --cc-cookie-category-block-bg: var(--cream);
+  --cc-cookie-category-block-border: var(--cream);
+  --cc-cookie-category-block-hover-bg: color-mix(in oklab, var(--cream) 90%, black);
+  --cc-cookie-category-block-hover-border: color-mix(in oklab, var(--cream) 90%, black);
+  --cc-separator-border-color: color-mix(in oklab, var(--foreground) 10%, transparent);
+  --cc-footer-bg: var(--cream);
+  --cc-link-color: var(--foreground);
+  --cc-overlay-bg: rgb(0 0 0 / 0.45);
 }
