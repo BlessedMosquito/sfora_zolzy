@@ -1,16 +1,21 @@
 import SiteNavbar from "@/components/navigation/navbar/site-navbar";
 import Sidebar from "@/components/navigation/sidebar";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function SiteHeader() {
   return (
     <header className="relative z-20 mx-auto flex w-full max-w-7xl shrink-0 flex-col gap-6 px-6 pt-6 md:px-8 lg:flex-row lg:items-center lg:gap-8 lg:px-12 lg:pt-8">
       <div className="flex items-center justify-between gap-4">
-        <Link
-          className="shrink-0 text-4xl font-semibold leading-none tracking-[-0.07em] md:text-5xl"
-          href="/"
-        >
-          Sfora Zołzy
+        <Link className="shrink-0" href="/">
+          <Image
+            alt="Sfora Zołzy"
+            className="h-16 w-auto md:h-20"
+            height={404}
+            loading="eager"
+            src="/logo/logo.png"
+            width={742}
+          />
         </Link>
         <Sidebar className="lg:hidden" />
       </div>

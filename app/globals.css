@@ -3,6 +3,9 @@
 /* The site is always light: `dark:` only applies under an explicit .dark class. */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Frosted surfaces turn solid when the system asks for less transparency. */
+@custom-variant reduce-transparency (@media (prefers-reduced-transparency: reduce));
+
 :root {
   color-scheme: light;
   --background: #ffffff;
@@ -13,13 +16,17 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-bitter);
 }
 
 body {
   background-color: var(--cream);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+h1,
+h2 {
+  font-family: var(--font-display);
 }
 
 a,
@@ -30,11 +37,12 @@ button {
 
 :root {
   --cream: #ede8d0;
-  --brand: #D0D5ED;
+  /* Sage from the background of the kennel's business card. */
+  --brand: #c3d2b4;
   --brand-light: var(--brand);
   --brand-lighter: var(--brand);
   --brand-secondary: var(--brand);
-  --on-brand: #1e2240;
+  --on-brand: #22301c;
   --amber: oklch(0.77 0.16 75);
   --amber-fg: oklch(0.22 0 0);
   --amber-hover: oklch(0.71 0.17 70);
@@ -133,6 +141,98 @@ button {
 
   .caption-muted {
     @apply text-[0.65rem] font-medium uppercase tracking-[0.28em] text-foreground/35;
+  }
+}
+
+/* Mobile menu drawer (components/navigation/sidebar.tsx): a modal <dialog>
+   holding a horizontal scroll-snap scroller. The left snap stop is an empty
+   viewport-wide spacer (closed), the right one the sheet (open), so the
+   swipe-to-close gesture is native scrolling, with momentum. */
+.drawer {
+  /* 0 = closed (transparent backdrop), 1 = open. */
+  --drawer-backdrop: 0;
+  --drawer-width: min(20rem, 85dvw);
+
+  inset: 0;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  /* A scroll container that contains overscroll keeps the page underneath
+     from scrolling while the menu is open. */
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+.drawer::backdrop {
+  background: rgb(23 23 23 / 0.2);
+  backdrop-filter: blur(4px);
+  opacity: var(--drawer-backdrop);
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+.drawer-scroller {
+  display: grid;
+  grid-template-columns: 100% var(--drawer-width);
+  height: 100%;
+  overflow-x: scroll;
+  overscroll-behavior: none;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .drawer-scroller {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Closed stop. It sits at scroll position 0, so the dialog always opens
+   with the sheet off-screen and slides it in from there. */
+.drawer-scroller::before {
+  content: "";
+  scroll-snap-align: start;
+}
+
+.drawer-sheet {
+  height: 100svh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-snap-align: end;
+}
+
+/* Backdrop opacity follows the swipe. Gated by @supports: without
+   animation-timeline the keyframes would pin the backdrop at one end. The
+   sidebar writes --drawer-backdrop from a scroll listener as the fallback. */
+@supports (animation-timeline: scroll()) {
+  @property --drawer-backdrop {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: 0;
+  }
+
+  .drawer {
+    timeline-scope: --drawer-fade;
+    animation: drawer-backdrop-fade linear both;
+    animation-timeline: --drawer-fade;
+  }
+
+  .drawer-scroller {
+    scroll-timeline: --drawer-fade x;
+  }
+
+  @keyframes drawer-backdrop-fade {
+    0% {
+      --drawer-backdrop: 0;
+    }
+    100% {
+      --drawer-backdrop: 1;
+    }
   }
 }
 

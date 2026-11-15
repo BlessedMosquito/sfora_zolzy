@@ -23,7 +23,7 @@ export default function ContactSection({ className }: ContactSectionProps) {
       id="kontakt"
     >
       <h2
-        className="text-3xl font-semibold leading-[0.98] tracking-[-0.05em] md:text-4xl"
+        className="text-3xl font-semibold leading-[1.05] tracking-[-0.015em] md:text-4xl"
         id="kontakt-heading"
       >
         Dane kontaktowe
@@ -94,7 +94,7 @@ function ContactItem({ className, href, icon, label, value }: ContactItemProps) 
     <a
       className={cn(
         cardClassName,
-        "transition-colors hover:bg-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand",
+        "transition-[background-color,scale] duration-150 ease-out hover:bg-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand active:scale-[0.98] active:bg-white/80 motion-reduce:active:scale-100",
       )}
       href={href}
     >

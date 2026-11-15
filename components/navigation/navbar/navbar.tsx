@@ -111,6 +111,7 @@ export default function FloatingNavbar({
       className={cn(
         "absolute inset-x-0 z-50 mx-auto flex w-fit items-center gap-1 rounded-full border border-foreground/10 bg-background/90 shadow-lg",
         blur && "backdrop-blur-md",
+        "reduce-transparency:bg-background reduce-transparency:backdrop-blur-none",
         position === "top" ? "top-4" : "bottom-4",
         isShrunk ? "px-3 py-2 md:px-2 md:py-1.5" : "px-3 py-2",
         className

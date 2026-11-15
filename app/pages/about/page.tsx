@@ -5,7 +5,7 @@ export default function AboutPage() {
     <main className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-6 py-16 md:px-8 md:py-20 lg:px-12">
       <div className="grid w-full items-center gap-14 lg:grid-cols-2 lg:gap-16">
         <section className="max-w-2xl">
-          <h1 className="text-4xl font-semibold leading-[0.94] tracking-[-0.06em] md:text-6xl lg:text-7xl">
+          <h1 className="text-4xl font-semibold leading-[1.02] tracking-[-0.02em] md:text-6xl lg:text-7xl">
             O nas
           </h1>
           <p className="paragraph-lead">

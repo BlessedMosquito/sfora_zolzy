@@ -1,11 +1,19 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Home, Info, Mail, Menu, PawPrint, X } from "lucide-react";
+import {
+  GraduationCap,
+  HeartHandshake,
+  Home,
+  Info,
+  Mail,
+  Menu,
+  PawPrint,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useRef, useState } from "react";
+import { type MouseEvent, useEffect, useId, useRef, useState } from "react";
 
 const SIDEBAR_ITEMS = [
   {
@@ -27,6 +35,18 @@ const SIDEBAR_ITEMS = [
     label: "Szczenięta",
   },
   {
+    href: "/pages/training",
+    icon: <GraduationCap className="size-4" />,
+    id: "training",
+    label: "Szkolenia",
+  },
+  {
+    href: "/pages/dog-therapy",
+    icon: <HeartHandshake className="size-4" />,
+    id: "dog-therapy",
+    label: "Dogoterapia",
+  },
+  {
     href: "/pages/contact",
     icon: <Mail className="size-4" />,
     id: "contact",
@@ -34,185 +54,189 @@ const SIDEBAR_ITEMS = [
   },
 ];
 
-const PANEL_SPRING = {
-  damping: 30,
-  stiffness: 320,
-  type: "spring" as const,
-};
-
-const ITEM_EASE = [0.22, 1, 0.36, 1] as const;
-
 export type SidebarProps = {
   className?: string;
 };
 
+// A modal <dialog> drawer (styles in globals.css under `.drawer`). The
+// browser makes the page inert, traps focus and restores it to the trigger
+// on close; scroll snap gives the swipe-to-close gesture.
 export default function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname();
-  const shouldReduceMotion = useReducedMotion();
   const [isOpen, setIsOpen] = useState(false);
-  const panelId = useId();
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const drawerId = useId();
+  const drawerRef = useRef<HTMLDialogElement>(null);
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const sheetRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const openedAtRef = useRef(0);
 
-  const openSidebar = () => {
+  const openDrawer = () => {
     openedAtRef.current = performance.now();
-    setIsOpen(true);
+    drawerRef.current?.showModal();
+    // showModal() would focus the scroller (scroll containers are
+    // focusable), so move focus to the close button explicitly.
+    closeButtonRef.current?.focus({ preventScroll: true });
+    const scroller = scrollerRef.current;
+    scroller?.scrollTo({ behavior: "auto", left: scroller.scrollWidth });
   };
 
-  const closeSidebar = () => {
-    if (performance.now() - openedAtRef.current < 500) {
-      return;
-    }
-    setIsOpen(false);
+  // Slides the sheet out; the observer below closes the dialog once the
+  // sheet has left the screen, so the slide-out stays visible.
+  const closeDrawer = () => {
+    scrollerRef.current?.scrollTo({ behavior: "auto", left: 0 });
   };
 
   useEffect(() => {
-    if (!isOpen) {
+    const drawer = drawerRef.current;
+    const scroller = scrollerRef.current;
+    const sheet = sheetRef.current;
+    if (!drawer || !scroller || !sheet) {
       return;
     }
 
-    const previousOverflow = document.body.style.overflow;
-    const triggerElement = triggerRef.current;
-    document.body.style.overflow = "hidden";
-    closeButtonRef.current?.focus();
+    // Swipes, taps and programmatic scrolls all end up here.
+    const visibleThreshold = 1 / window.innerWidth;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries.at(-1);
+        if (!entry) {
+          return;
+        }
+        if (entry.intersectionRatio < visibleThreshold) {
+          if (drawer.open) {
+            drawer.close();
+          }
+          setIsOpen(false);
+        } else if (entry.intersectionRatio === 1) {
+          setIsOpen(true);
+        }
+      },
+      { root: drawer, threshold: [visibleThreshold, 1] },
+    );
+    observer.observe(sheet);
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsOpen(false);
+    // Escape slides the sheet out instead of closing instantly.
+    const handleCancel = (event: Event) => {
+      if (event.cancelable) {
+        event.preventDefault();
+        closeDrawer();
       }
     };
+    drawer.addEventListener("cancel", handleCancel);
 
-    window.addEventListener("keydown", handleKeyDown);
+    // Backdrop fade for browsers without scroll-driven animations.
+    let handleScroll: (() => void) | undefined;
+    if (!CSS.supports("animation-timeline: scroll()")) {
+      handleScroll = () => {
+        const ratio = scroller.scrollLeft / sheet.offsetWidth;
+        drawer.style.setProperty("--drawer-backdrop", String(ratio));
+      };
+      scroller.addEventListener("scroll", handleScroll);
+    }
 
     return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-      triggerElement?.focus();
+      observer.disconnect();
+      drawer.removeEventListener("cancel", handleCancel);
+      if (handleScroll) {
+        scroller.removeEventListener("scroll", handleScroll);
+      }
     };
-  }, [isOpen]);
+  }, []);
 
-  const itemVariants = {
-    hidden: shouldReduceMotion ? { opacity: 1 } : { opacity: 0, x: 16 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: shouldReduceMotion
-        ? { duration: 0 }
-        : { duration: 0.2, ease: ITEM_EASE },
-    },
+  // A tap outside the sheet lands on the dialog itself. Taps right after
+  // opening are ignored: the opening tap can arrive again as a ghost click.
+  const handleDrawerClick = (event: MouseEvent<HTMLDialogElement>) => {
+    if (performance.now() - openedAtRef.current < 400) {
+      return;
+    }
+    if (!sheetRef.current?.contains(event.target as Node)) {
+      closeDrawer();
+    }
   };
 
   return (
     <>
       <button
-        aria-controls={panelId}
+        aria-controls={drawerId}
         aria-expanded={isOpen}
         aria-haspopup="dialog"
         aria-label="Otwórz menu"
         className={cn(
-          "inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-foreground/10 bg-background/80 text-foreground shadow-sm backdrop-blur-md transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand",
-          className
+          "inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-foreground/10 bg-background/80 text-foreground shadow-sm backdrop-blur-md transition-[background-color,scale] duration-150 hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand active:scale-95 motion-reduce:active:scale-100 reduce-transparency:bg-background reduce-transparency:backdrop-blur-none",
+          className,
         )}
-        onClick={openSidebar}
-        ref={triggerRef}
+        onClick={openDrawer}
         type="button"
       >
         <Menu aria-hidden="true" className="size-5" />
       </button>
 
-      <AnimatePresence>
-        {isOpen ? (
-          <>
-            <motion.div
-              animate={{ opacity: 1 }}
-              aria-hidden="true"
-              className="fixed inset-0 z-[60] bg-foreground/20 backdrop-blur-sm"
-              exit={{ opacity: 0 }}
-              initial={{ opacity: 0 }}
-              onClick={closeSidebar}
-              transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
-            />
-            <motion.aside
-              animate={{ x: 0 }}
-              aria-label="Menu strony"
-              aria-modal="true"
-              className="fixed inset-y-0 right-0 z-[70] flex w-80 max-w-[85vw] flex-col border-l border-foreground/10 bg-background/75 p-6 shadow-2xl backdrop-blur-xl"
-              exit={shouldReduceMotion ? { opacity: 0 } : { x: "100%" }}
-              id={panelId}
-              initial={shouldReduceMotion ? false : { x: "100%" }}
-              role="dialog"
-              transition={shouldReduceMotion ? { duration: 0 } : PANEL_SPRING}
-            >
-              <div className="flex items-center justify-between gap-4">
-                <p className="caption">Menu</p>
-                <button
-                  aria-label="Zamknij menu"
-                  className="inline-flex size-11 items-center justify-center rounded-xl border border-foreground/10 bg-background/80 text-foreground transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-                  onClick={closeSidebar}
-                  ref={closeButtonRef}
-                  type="button"
-                >
-                  <X aria-hidden="true" className="size-5" />
-                </button>
-              </div>
-
-              <motion.nav
-                animate="visible"
-                aria-label="Nawigacja"
-                className="mt-10 flex flex-col gap-2"
-                initial="hidden"
-                variants={{
-                  hidden: {},
-                  visible: {
-                    transition: {
-                      delayChildren: shouldReduceMotion ? 0 : 0.1,
-                      staggerChildren: shouldReduceMotion ? 0 : 0.05,
-                    },
-                  },
-                }}
+      <dialog
+        aria-label="Menu strony"
+        className="drawer"
+        id={drawerId}
+        onClick={handleDrawerClick}
+        ref={drawerRef}
+      >
+        <div className="drawer-scroller" ref={scrollerRef}>
+          <nav
+            aria-label="Nawigacja"
+            className="drawer-sheet flex flex-col border-l border-foreground/10 bg-background/75 p-6 shadow-2xl backdrop-blur-xl reduce-transparency:bg-background reduce-transparency:backdrop-blur-none"
+            ref={sheetRef}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <p className="caption">Menu</p>
+              <button
+                aria-label="Zamknij menu"
+                className="inline-flex size-11 items-center justify-center rounded-xl border border-foreground/10 bg-background/80 text-foreground transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                onClick={closeDrawer}
+                ref={closeButtonRef}
+                type="button"
               >
-                {SIDEBAR_ITEMS.map((item) => {
-                  const isActive = item.href === pathname;
+                <X aria-hidden="true" className="size-5" />
+              </button>
+            </div>
 
-                  return (
-                    <motion.div key={item.id} variants={itemVariants}>
-                      <Link
-                        aria-current={isActive ? "page" : undefined}
-                        className={cn(
-                          "flex min-h-12 items-center gap-3 rounded-2xl px-4 text-sm font-medium transition-colors",
-                          isActive
-                            ? "bg-foreground/10 text-foreground"
-                            : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
-                        )}
-                        href={item.href ?? "#"}
-                        onClick={() => setIsOpen(false)}
+            <ul className="mt-10 flex flex-col gap-2">
+              {SIDEBAR_ITEMS.map((item) => {
+                const isActive = item.href === pathname;
+
+                return (
+                  <li key={item.id}>
+                    <Link
+                      aria-current={isActive ? "page" : undefined}
+                      className={cn(
+                        "flex min-h-12 items-center gap-3 rounded-2xl px-4 text-sm font-medium transition-[background-color,color,scale] duration-150 active:scale-[0.98] motion-reduce:active:scale-100",
+                        isActive
+                          ? "bg-foreground/10 text-foreground"
+                          : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground",
+                      )}
+                      href={item.href}
+                      onClick={closeDrawer}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="flex size-8 shrink-0 items-center justify-center rounded-full border border-foreground/10 bg-background/60"
                       >
-                        {item.icon ? (
-                          <span
-                            aria-hidden="true"
-                            className="flex size-8 shrink-0 items-center justify-center rounded-full border border-foreground/10 bg-background/60"
-                          >
-                            {item.icon}
-                          </span>
-                        ) : null}
-                        <span>{item.label}</span>
-                      </Link>
-                    </motion.div>
-                  );
-                })}
-              </motion.nav>
+                        {item.icon}
+                      </span>
+                      <span>{item.label}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
 
-              <div className="mt-auto border-t border-foreground/10 pt-6">
-                <p className="caption-muted">Sfora Zołzy</p>
-                <p className="paragraph-muted">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                </p>
-              </div>
-            </motion.aside>
-          </>
-        ) : null}
-      </AnimatePresence>
+            <div className="mt-auto border-t border-foreground/10 pt-6">
+              <p className="caption-muted">Sfora Zołzy</p>
+              <p className="paragraph-muted">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+              </p>
+            </div>
+          </nav>
+        </div>
+      </dialog>
     </>
   );
 }

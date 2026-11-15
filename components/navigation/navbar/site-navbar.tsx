@@ -2,7 +2,7 @@
 
 import type { FloatingNavbarItem } from "@/components/navigation/navbar/navbar";
 import FloatingNavbar from "@/components/navigation/navbar/navbar";
-import { Home, Info, Mail, PawPrint } from "lucide-react";
+import { GraduationCap, HeartHandshake, Home, Info, Mail, PawPrint } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS: FloatingNavbarItem[] = [
@@ -23,6 +23,18 @@ const NAV_ITEMS: FloatingNavbarItem[] = [
     icon: <PawPrint className="size-4" />,
     id: "puppies",
     label: "Szczenięta",
+  },
+  {
+    href: "/pages/training",
+    icon: <GraduationCap className="size-4" />,
+    id: "training",
+    label: "Szkolenia",
+  },
+  {
+    href: "/pages/dog-therapy",
+    icon: <HeartHandshake className="size-4" />,
+    id: "dog-therapy",
+    label: "Dogoterapia",
   },
   {
     href: "/pages/contact",

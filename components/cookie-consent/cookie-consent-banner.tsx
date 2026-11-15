@@ -15,7 +15,7 @@ export default function CookieConsentBanner() {
         [MAPS_CATEGORY]: {},
       },
       guiOptions: {
-        consentModal: { layout: "box", position: "bottom left" },
+        consentModal: { layout: "cloud inline", position: "bottom center" },
         preferencesModal: { layout: "box" },
       },
       language: {
