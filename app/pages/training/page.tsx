@@ -3,9 +3,9 @@ import RoundedPhoto from "@/components/rounded-photo/rounded-photo";
 // Add a `src` (e.g. "/training1.jpg") once the photos are ready; without it
 // an empty frame is shown.
 const photos: { caption: string; src?: string }[] = [
-  { caption: "Posłuszeństwo" },
-  { caption: "Chodzenie na smyczy" },
-  { caption: "Socjalizacja" },
+  { caption: "Praca na rękawie", src: "/training/szkolenie1.JPG" },
+  { caption: "Puszczanie na komendę" },
+  { caption: "Budowanie pewności siebie", src: "/training/szkolenie2.JPG" },
 ];
 
 export default function TrainingPage() {
@@ -16,10 +16,10 @@ export default function TrainingPage() {
           Szkolenia
         </h1>
         <p className="paragraph-lead">
-          Pomagamy właścicielom zbudować z psem dobrą relację od pierwszych dni
-          w nowym domu. Uczymy podstaw posłuszeństwa, spokojnego chodzenia na
-          smyczy i zachowania w nowych sytuacjach, zawsze z użyciem pozytywnych
-          metod.
+          Prowadzimy szkolenia z gryzienia, czyli pracy obronnej na rękawie.
+          Uczymy psa pewnego, pełnego chwytu, a przede wszystkim puszczania na
+          komendę i pełnej kontroli przewodnika. Tempo zajęć dopasowujemy do
+          wieku i charakteru psa.
         </p>
       </section>
 

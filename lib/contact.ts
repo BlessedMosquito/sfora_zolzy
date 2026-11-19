@@ -1,9 +1,13 @@
-// Fill these in to show real contact details on the contact page.
-export const CONTACT_PHONE: string = "123 456 789";
+// Fill these in to show real contact details on the contact page. A phone
+// with an empty number is hidden.
+export const CONTACT_PHONES: { name: string; number: string }[] = [
+  { name: "Gabrysia", number: "123 456 789" },
+  { name: "Mariusz", number: "987 654 321" },
+];
 export const CONTACT_EMAIL: string = "sfora_zolzy@gmail.com";
 
-export const hasContactPhone = CONTACT_PHONE !== "YOUR_PHONE";
 export const hasContactEmail = CONTACT_EMAIL !== "YOUR_EMAIL";
 
-export const phoneHref = `tel:${CONTACT_PHONE.replace(/[^\d+]/g, "")}`;
+export const phoneHref = (number: string) =>
+  `tel:${number.replace(/[^\d+]/g, "")}`;
 export const emailHref = `mailto:${CONTACT_EMAIL}`;

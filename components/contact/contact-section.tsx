@@ -1,9 +1,8 @@
 import {
   CONTACT_EMAIL,
-  CONTACT_PHONE,
+  CONTACT_PHONES,
   emailHref,
   hasContactEmail,
-  hasContactPhone,
   phoneHref,
 } from "@/lib/contact";
 import { KENNEL_ADDRESS_LINES } from "@/lib/location";
@@ -40,13 +39,18 @@ export default function ContactSection({ className }: ContactSectionProps) {
               : undefined
           }
         />
+        {CONTACT_PHONES.filter((phone) => phone.number).map((phone) => (
+          <ContactItem
+            href={phoneHref(phone.number)}
+            icon={<Phone aria-hidden="true" className="size-5" />}
+            key={phone.name}
+            label="Telefon"
+            name={phone.name}
+            value={phone.number}
+          />
+        ))}
         <ContactItem
-          href={hasContactPhone ? phoneHref : undefined}
-          icon={<Phone aria-hidden="true" className="size-5" />}
-          label="Telefon"
-          value={hasContactPhone ? CONTACT_PHONE : undefined}
-        />
-        <ContactItem
+          className="md:col-span-2 lg:col-span-1"
           href={hasContactEmail ? emailHref : undefined}
           icon={<Mail aria-hidden="true" className="size-5" />}
           label="E-mail"
@@ -62,17 +66,33 @@ type ContactItemProps = {
   href?: string;
   icon: ReactNode;
   label: string;
+  // Who answers this contact, shown as a badge next to the label.
+  name?: string;
   value?: string;
 };
 
-function ContactItem({ className, href, icon, label, value }: ContactItemProps) {
+function ContactItem({
+  className,
+  href,
+  icon,
+  label,
+  name,
+  value,
+}: ContactItemProps) {
   const content = (
     <>
       <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white/70 ring-1 ring-foreground/10">
         {icon}
       </span>
       <span className="min-w-0">
-        <span className="caption block">{label}</span>
+        <span className="flex flex-wrap items-center gap-2">
+          <span className="caption">{label}</span>
+          {name ? (
+            <span className="rounded-full bg-brand px-2.5 py-0.5 text-sm font-semibold text-on-brand">
+              {name}
+            </span>
+          ) : null}
+        </span>
         <span
           className={cn(
             "mt-1 block break-words text-lg font-medium",
